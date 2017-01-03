@@ -3,6 +3,11 @@ require 'singleton'
 module Stepable
 
   def moves
+    result = []
+    move_diffs.each do |x, y|
+
+    end
+    result
   end
 
   private
@@ -42,7 +47,7 @@ module Slideable
 
       break unless board.valid_pos?(pos)
 
-      if board.empty?(pos)
+      if board[pos].is_a?(NullPiece)
         moves << pos
       else
         moves << pos if board[pos].color != color
