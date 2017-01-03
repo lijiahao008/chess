@@ -1,17 +1,30 @@
 require 'singleton'
-
+require 'byebug'
 module Stepable
 
   def moves
     result = []
-    move_diffs.each do |x, y|
+    move_diffs.each do |dx, dy|
+      new_x, new_y = pos
+      new_x, new_y = new_x + dx, new_y + dy
+      new_pos = [new_x, new_y]
 
+      next unless board.in_bounds?(new_pos)
+
+      if board[new_pos].is_a?(NullPiece)
+        result << new_pos
+      else
+        result << new_pos if board[new_pos].color != color
+      end
     end
+
     result
   end
 
   private
   def move_diffs
+    # implemented by class which is including this module
+    raise "AHHHHHHH!!!!"
   end
 end
 
@@ -45,7 +58,7 @@ module Slideable
       new_x, new_y = new_x + dx, new_y + dy
       new_pos = [new_x, new_y]
 
-      break unless board.valid_pos?(new_pos)
+      break unless board.in_bounds?(new_pos)
 
       if board[new_pos].is_a?(NullPiece)
         moves << new_pos
@@ -54,28 +67,40 @@ module Slideable
         break
       end
     end
+
     moves
   end
 end
 
 class Piece
-  attr_reader :board, :pos, :color, :symbol
+  attr_reader :board, :color, :symbol
+  attr_accessor :pos
 
   def initialize(board, pos, color)
-    # @name = name
     @board = board
     @pos = pos
     @color = color
     @symbol = nil
   end
+
+  def valid_moves
+    moves.reject { |move| move_into_check?(move) }
+  end
+
+  def move_into_check?(end_pos)
+    new_board = board.deep_dup
+    new_board.move_piece(pos, end_pos)
+    new_board.in_check?(color)
+  end
 end
 
 class NullPiece < Piece
   include Singleton
-  attr_reader :symbol
+  attr_reader :symbol, :color
 
   def initialize
-    @symbol = :nullpiece
+    @symbol = " "
+    @color = :clear
   end
 end
 
@@ -85,7 +110,7 @@ class Bishop < Piece
 
   def initialize(board, pos, color)
     super(board, pos, color)
-    @symbol = :bishop
+    @symbol = color == :black ? "♝" : "♗"
   end
 
   def move_dirs
@@ -100,7 +125,7 @@ class Rook < Piece
 
   def initialize(board, pos, color)
     super(board, pos, color)
-    @symbol = :rook
+    @symbol = color == :black ? "♜" : "♖"
   end
 
   def move_dirs
@@ -114,7 +139,7 @@ class Queen < Piece
 
   def initialize(board, pos, color)
     super(board, pos, color)
-    @symbol = :queen
+    @symbol = color == :black ? "♛" : "♕"
   end
 
   def move_dirs
@@ -128,7 +153,20 @@ class Knight < Piece
 
   def initialize(board, pos, color)
     super(board, pos, color)
-    @symbol = :knight
+    @symbol = color == :black ? "♞" : "♘"
+  end
+
+  protected
+  def move_diffs
+    [ [-2, -1],
+      [-2,  1],
+      [-1, -2],
+      [-1,  2],
+      [ 1, -2],
+      [ 1,  2],
+      [ 2, -1],
+      [ 2,  1]
+    ]
   end
 end
 
@@ -138,7 +176,20 @@ class King < Piece
 
   def initialize(board, pos, color)
     super(board, pos, color)
-    @symbol = :king
+    @symbol = color == :black ? "♚" : "♔"
+  end
+
+  protected
+  def move_diffs
+    [ [-1, -1],
+      [-1,  0],
+      [-1,  1],
+      [ 0,  1],
+      [ 1,  1],
+      [ 1,  0],
+      [ 1, -1],
+      [ 0, -1]
+    ]
   end
 end
 
@@ -147,6 +198,47 @@ class Pawn < Piece
 
   def initialize(board, pos, color)
     super(board, pos, color)
-    @symbol = :pawn
+    @symbol = color == :black ? "♟" : "♙"
   end
+
+  def moves
+    result = []
+    side_attacks.each do |dx, dy|
+      new_pos = [pos[0] + dx, pos[1] + dy]
+      next unless board.in_bounds?(new_pos)
+      opponent_color = (color == :white ? :black : :white)
+      result << new_pos if board[new_pos].color == opponent_color
+    end
+
+    (1..forward_steps).each do |i|
+      new_pos = [pos[0] + (forward_dir * i), pos[1]]
+      next unless board.in_bounds?(new_pos)
+      result << new_pos if board[new_pos].is_a?(NullPiece)
+    end
+
+    result
+  end
+
+  def at_start_row?
+    (color == :black && pos[0] == 1) || (color == :white && pos[0] == 6)
+  end
+
+  def forward_dir
+    color == :black ? 1 : -1
+  end
+
+  def forward_steps
+    at_start_row? ? 2 : 1
+  end
+
+  def side_attacks
+    if color == :black
+      [[1, -1], [1, 1]]
+    else
+      [[-1, -1], [-1, 1]]
+    end
+  end
+end
+
+class MoveDiffsError < StandardError
 end

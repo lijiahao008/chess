@@ -95,9 +95,9 @@ class Cursor
       update_pos(MOVES[key])
       nil
     when :ctrl_c
+      system('clear')
       Process.exit(0)
     end
-
   end
 
   def update_pos(diff)
