@@ -1,7 +1,6 @@
 require 'singleton'
 
 module Stepable
-  DELTAS = [ [ ] ]
 
   def moves
   end
