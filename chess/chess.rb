@@ -1,6 +1,5 @@
 require_relative 'board'
 require_relative 'player'
-require 'byebug'
 
 class Chess
   attr_reader :player1, :player2, :board
@@ -24,12 +23,10 @@ class Chess
     current_player.display.render
   end
 
+  private
+
   def game_over?
     board.checkmate?(player1.color) || board.checkmate?(player2.color)
-  end
-
-  private
-  def notify_players
   end
 
   def swap_turn!

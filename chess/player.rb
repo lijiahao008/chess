@@ -32,22 +32,18 @@ class HumanPlayer < Player
   end
 
   def valid_start_pos?(start_pos)
-    thing = board[start_pos].color == color && !board[start_pos].valid_moves.empty?
-    unless thing
-      puts "Cannot start here."
-    else
-      thing
-    end
+    result = board[start_pos].color == color && !board[start_pos].valid_moves.empty?
+    puts "Cannot start here." unless result
+    result
   end
 
   def valid_end_pos?(start_pos, end_pos)
-    thing = board[start_pos].color == color && !board[start_pos].valid_moves.empty?
-    puts "Cannot end here." unless  thing
-    thing
+    result = board[start_pos].valid_moves.include?(end_pos)
+    puts "Cannot end here." unless result
+    result
   end
 
   def get_pos
-
     pos = nil
     loop do
       pos = @display.cursor.get_input
@@ -60,5 +56,3 @@ class HumanPlayer < Player
     pos
   end
 end
-# class ComputerPlayer < Player
-# end

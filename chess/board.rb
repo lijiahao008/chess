@@ -9,12 +9,12 @@ class Board
   end
 
   def populate
-    grid[2..5].map! do |row|
-      row.map! do |el|
-        el = NullPiece.instance
-      end
-    end
+    populate_null_pieces
+    populate_soldiers
+    populate_pawns
+  end
 
+  def populate_soldiers
     self.grid[0] = [Rook.new(self, [0,0], :black),
                       Knight.new(self, [0,1], :black),
                       Bishop.new(self, [0,2], :black),
@@ -32,7 +32,17 @@ class Board
                       Bishop.new(self, [7, 5], :white),
                       Knight.new(self, [7, 6], :white),
                       Rook.new(self, [7,7], :white)]
+  end
 
+  def populate_null_pieces
+    grid[2..5].map! do |row|
+      row.map! do |el|
+        el = NullPiece.instance
+      end
+    end
+  end
+
+  def populate_pawns
     [1, 6].each do |row|
       color = row == 1 ? :black : :white
 
@@ -57,7 +67,7 @@ class Board
   def checkmate?(current_player_color)
     return false unless in_check?(current_player_color)
     current_player_pieces = pieces(current_player_color)
-    current_player_pieces.all? { |current_player_piece| current_player_piece.valid_moves.empty? } # !!!!don't trust this
+    current_player_pieces.all? { |current_player_piece| current_player_piece.valid_moves.empty? }
   end
 
   def find_king_pos(current_player_color)

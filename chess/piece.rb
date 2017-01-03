@@ -24,7 +24,7 @@ module Stepable
   private
   def move_diffs
     # implemented by class which is including this module
-    raise "AHHHHHHH!!!!"
+    raise "Method is not implemented"
   end
 end
 
@@ -40,7 +40,7 @@ module Slideable
 
   private
   def move_dirs
-
+    raise "Method is not implemented"
   end
 
   def horizontal_dirs
@@ -116,7 +116,6 @@ class Bishop < Piece
   def move_dirs
     diagonal_dirs
   end
-
 end
 
 class Rook < Piece

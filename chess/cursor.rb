@@ -102,7 +102,6 @@ class Cursor
 
   def update_pos(diff)
     pos = [cursor_pos[0] + diff[0], cursor_pos[1] + diff[1]]
-
     self.cursor_pos = pos if board.in_bounds?(pos)
   end
 end
